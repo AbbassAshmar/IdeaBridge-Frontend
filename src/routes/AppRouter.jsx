@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import DashboardPage from "../pages/DashboardPage";
+import MyIdeasPage from "../pages/MyIdeasPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -46,6 +47,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-ideas"
+        element={
+          <ProtectedRoute>
+            <MyIdeasPage />
           </ProtectedRoute>
         }
       />

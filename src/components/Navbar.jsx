@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
+  ListChecks,
   LogIn,
   LogOut,
   Sparkles,
@@ -81,6 +82,19 @@ function Navbar() {
             >
               <LayoutDashboard size={15} />
               Dashboard
+            </NavLink>
+            <NavLink
+              to="/my-ideas"
+              className={({ isActive }) =>
+                `inline-flex items-center gap-1 text-sm font-medium no-underline transition-colors ${
+                  isActive
+                    ? "text-slate-50"
+                    : "text-slate-400 hover:text-slate-200"
+                }`
+              }
+            >
+              <ListChecks size={15} />
+              My Ideas
             </NavLink>
             <button
               type="button"
