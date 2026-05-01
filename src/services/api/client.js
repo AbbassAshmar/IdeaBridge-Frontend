@@ -5,11 +5,26 @@ const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const apiClient = axios.create({
   baseURL,
   withCredentials: true,
-  withXSRFToken: true,
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
   },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("XSRF-TOKEN="));
+
+  if (match) {
+    const token = decodeURIComponent(match.split("=")[1]);
+
+    config.headers["X-XSRF-TOKEN"] = token;
+  }
+
+  return config;
 });
 
 export function getErrorMessage(error, fallback = "Something went wrong.") {
