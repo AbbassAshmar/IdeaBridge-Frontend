@@ -1,7 +1,7 @@
 import apiClient from "./client";
 import { endpoints } from "./endpoints";
 
-async function ensureCsrfCookie() {
+export async function ensureCsrfCookie() {
   	await apiClient.get(endpoints.CSRF_COOKIE());
 }
 

@@ -56,6 +56,15 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
   }, [filters]);
 
   useEffect(() => {
+    if (!user) {
+      setIdeas([]);
+      setRawIdeas([]);
+      setPagination(null);
+      setErrorMessage("");
+      setIsLoading(false);
+      return;
+    }
+
     let isActive = true;
 
     const fetchIdeas = async () => {
@@ -97,7 +106,7 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
     return () => {
       isActive = false;
     };
-  }, [activeFeed, queryParams]);
+  }, [activeFeed, queryParams, user]);
 
   useEffect(() => {
     if (activeFeed !== "mine") {
@@ -148,6 +157,14 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
   }, [activeFeed, filters, rawIdeas]);
 
   useEffect(() => {
+    if (!user) {
+      setCategories([]);
+      setCreateMessage("");
+      setCreateMessageType("success");
+      setIsLoadingCategories(false);
+      return;
+    }
+
     let isActive = true;
 
     const fetchCategories = async () => {
@@ -178,7 +195,7 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [user]);
 
   const handleSearchChange = (event) => {
     setFilters((prev) => ({

@@ -6,4 +6,5 @@ export const endpoints = {
   REGISTER: () => "/api/auth/register",
   LOGOUT: () => "/api/auth/logout",
   GET_CURRENT_USER: () => "/api/auth/user",
+  GET_CATEGORIES: () => "/api/categories",
 };
