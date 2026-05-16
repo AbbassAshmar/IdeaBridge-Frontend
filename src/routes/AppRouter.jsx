@@ -3,7 +3,8 @@ import { useAuth } from "../hooks/useAuth";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import DashboardPage from "../pages/DashboardPage";
-import MyIdeasPage from "../pages/MyIdeasPage";
+import CreateIdeaPage from "../pages/CreateIdeaPage";
+import ProfilePage from "../pages/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -12,7 +13,7 @@ function AppRouter() {
 
   if (isLoading) {
     return (
-      <div className="grid min-h-screen place-items-center text-slate-200">
+      <div className="grid min-h-screen place-items-center text-content-primary">
         Loading...
       </div>
     );
@@ -23,27 +24,31 @@ function AppRouter() {
       <Route
         path="/"
         element={
-          <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+          <Navigate to={isAuthenticated ? "/ideas" : "/login"} replace />
         }
       />
       <Route
         path="/login"
         element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+          isAuthenticated ? <Navigate to="/ideas" replace /> : <LoginPage />
         }
       />
       <Route
         path="/register"
         element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <RegisterPage />
-          )
-        }
-      />
+            isAuthenticated ? (
+              <Navigate to="/ideas" replace />
+            ) : (
+              <RegisterPage />
+            )
+          }
+        />
       <Route
         path="/dashboard"
+        element={<Navigate to="/ideas" replace />}
+      />
+      <Route
+        path="/ideas"
         element={
           <ProtectedRoute>
             <DashboardPage />
@@ -51,10 +56,26 @@ function AppRouter() {
         }
       />
       <Route
+        path="/ideas/create"
+        element={
+          <ProtectedRoute>
+            <CreateIdeaPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/my-ideas"
         element={
           <ProtectedRoute>
-            <MyIdeasPage />
+            <Navigate to="/profile" replace />
           </ProtectedRoute>
         }
       />

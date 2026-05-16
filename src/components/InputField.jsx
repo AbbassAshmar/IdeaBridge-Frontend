@@ -14,12 +14,12 @@ function InputField({
 
   return (
     <div className="mb-4">
-      <label htmlFor={id} className="mb-2 block text-sm text-slate-300">
+      <label htmlFor={id} className="mb-2 block text-sm text-content-tertiary">
         {label}
       </label>
       <div className="relative">
         {Icon ? (
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary">
             <Icon size={16} />
           </span>
         ) : null}
@@ -31,12 +31,12 @@ function InputField({
           onChange={onChange}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={`w-full rounded-xl border bg-slate-900 px-3 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:bg-slate-800 focus:ring-2 focus:ring-blue-500/30 ${
+          className={`focus-ring w-full rounded-card border bg-ui-input px-3 py-3 text-base text-content-primary outline-none transition placeholder:text-content-tertiary hover:bg-ui-input-hover focus:border-ui-border-focus focus:ring-2 focus:ring-accent-400/30 ${
             Icon ? "pl-10" : ""
-          } ${error ? "border-red-400" : "border-slate-700"}`}
+          } ${error ? "border-danger" : "border-ui-border"}`}
         />
       </div>
-      <p className="mt-1.5 min-h-[18px] text-xs text-red-400">{error || ""}</p>
+      <p className="mt-1.5 min-h-[18px] text-xs text-danger">{error || ""}</p>
     </div>
   );
 }

@@ -23,7 +23,7 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fromPath = useMemo(
-    () => location.state?.from?.pathname || "/dashboard",
+    () => location.state?.from?.pathname || "/ideas",
     [location.state],
   );
 
@@ -113,7 +113,7 @@ function LoginPage() {
 
           <button
             type="submit"
-            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 px-4 py-3 text-sm font-semibold text-slate-50 transition hover:-translate-y-0.5 hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-80"
+            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-card bg-gradient-to-br from-accent-400 to-accent-500 px-4 py-3 text-sm font-semibold text-content-inverse transition hover:-translate-y-0.5 hover:shadow-glow-accent disabled:cursor-not-allowed disabled:opacity-80"
             disabled={isSubmitting}
           >
             <LogIn size={16} />
@@ -123,11 +123,11 @@ function LoginPage() {
           <FormMessage message={message} type={messageType} />
         </form>
 
-        <p className="mt-4 text-sm text-slate-400">
+        <p className="mt-4 text-sm text-content-tertiary">
           Don&apos;t have an account?{" "}
           <Link
             to="/register"
-            className="font-semibold text-blue-300 no-underline hover:text-blue-200 hover:underline"
+            className="font-semibold text-accent-400 no-underline hover:text-accent-300 hover:underline"
           >
             Register
           </Link>

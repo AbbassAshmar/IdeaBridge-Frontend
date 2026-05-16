@@ -5,7 +5,7 @@ function FormMessage({ message, type = "success" }) {
 
   return (
     <p
-      className={`mt-3 min-h-[20px] text-sm ${type === "error" ? "text-red-400" : "text-emerald-400"}`}
+      className={`mt-3 min-h-[20px] text-sm font-medium ${type === "error" ? "text-danger" : "text-success"}`}
     >
       {message}
     </p>

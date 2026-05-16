@@ -4,30 +4,169 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-#root {
+/* ============================================================
+   IDEABOARD — DESIGN TOKEN SYSTEM
+   All theme-sensitive values live here as CSS variables.
+   Tailwind classes reference them via tailwind.config.js.
+
+   Naming convention:
+     --surface-*   → background layers (page, card, overlay, input…)
+     --content-*   → text / icon colors
+     --ui-*        → borders, inputs, skeleton loaders
+   ============================================================ */
+
+/* ── Light Mode (default) ────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* Surfaces — layered from base (page) → raised (card) → overlay (dropdown) */
+  --surface-base:    248 249 252;   /* #F8F9FC — off-white page bg                */
+  --surface-raised:  255 255 255;   /* #FFFFFF — cards, dialogs                   */
+  --surface-overlay: 255 255 255;   /* #FFFFFF — tooltips, dropdowns              */
+  --surface-sunken:  241 243 249;   /* #F1F3F9 — inputs, code blocks, tags        */
+  --surface-dim:     234 237 245;   /* #EAF0F5 — hover on surface-raised          */
+
+  /* Content — text & icon hierarchy */
+  --content-primary:   15  20  40;  /* #0F1428 — headings, primary body text      */
+  --content-secondary: 71  85 105;  /* #475569 — captions, subtext                */
+  --content-tertiary:  148 163 184; /* #94A3B8 — placeholders, hints              */
+  --content-inverse:   15  20  40;  /* #0F1428 — text ON the yellow accent bg     */
+  --content-disabled:  203 213 225; /* #CBD5E1 — disabled labels                  */
+
+  /* UI — borders, inputs */
+  --ui-border:        218 223 235;  /* #DAE0EB — default dividers & borders       */
+  --ui-border-strong: 148 163 184;  /* #94A3B8 — emphasized separators            */
+  --ui-border-focus:  254 228  64;  /* #FEE440 — focus ring (accent)              */
+  --ui-input:         255 255 255;  /* #FFFFFF — input background                 */
+  --ui-input-hover:   248 249 252;  /* #F8F9FC — input on hover                   */
+  --ui-skeleton:      226 232 240;  /* #E2E8F0 — skeleton loader base             */
+
+  /* Background decorative gradients */
+  --glow-primary-rgb:   254 228  64;  /* accent glow color  */
+  --glow-secondary-rgb:  56 189 248;  /* info glow color    */
+}
+
+/* ── Dark Mode ───────────────────────────────────────────── */
+html.dark {
+  color-scheme: dark;
+
+  /* Surfaces — dark slate palette, intentionally deep */
+  --surface-base:     10  13  25;   /* #0A0D19 — deep navy page bg                */
+  --surface-raised:   17  22  40;   /* #111628 — card / panel bg                  */
+  --surface-overlay:  24  31  52;   /* #181F34 — dropdown / popover bg            */
+  --surface-sunken:   13  17  32;   /* #0D1120 — sunken input / code bg           */
+  --surface-dim:      24  32  55;   /* #182037 — hover on raised surface          */
+
+  /* Content */
+  --content-primary:   241 245 250; /* #F1F5FA — primary text, headings           */
+  --content-secondary: 148 163 184; /* #94A3B8 — subtext, captions                */
+  --content-tertiary:   90 99 121; /* #475569 — hints, placeholders              */
+  --content-inverse:    15  20  40; /* #0F1428 — text ON yellow accent bg         */
+  --content-disabled:   51  65  85; /* #334155 — disabled labels                  */
+
+  /* UI */
+  --ui-border:         36  46  75;  /* #242E4B — subtle borders                   */
+  --ui-border-strong:  51  65  85;  /* #334155 — visible separators               */
+  --ui-border-focus:  254 228  64;  /* #FEE440 — focus ring stays accent          */
+  --ui-input:          17  22  40;  /* #111628 — input background                 */
+  --ui-input-hover:    24  31  52;  /* #181F34 — input hover                      */
+  --ui-skeleton:       24  32  55;  /* #182037 — skeleton loader base             */
+
+  /* Glow colors same — accent stays consistent */
+  --glow-primary-rgb:   254 228  64;
+  --glow-secondary-rgb:   56 189 248;
+}
+
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+
+html, body, #root {
   height: 100%;
 }
 
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
-  color: #e2e8f0;
-  background:
-    radial-gradient(
-      1000px 600px at 10% -5%,
-      rgba(56, 189, 248, 0.2),
-      transparent 65%
-    ),
-    radial-gradient(
-      900px 550px at 100% 100%,
-      rgba(59, 130, 246, 0.18),
-      transparent 68%
-    ),
-    linear-gradient(180deg, #05070d 0%, #0b1020 100%);
+  color: rgb(var(--content-primary));
+  background-color: rgb(var(--surface-base));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
 }
+
+/* ── Page-level decorative background ───────────────────── */
+/* Applied to <body> or a fixed <div class="page-bg"> element */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+
+  background:
+    /* Top-left accent glow */
+    radial-gradient(
+      ellipse 900px 600px at -5% -10%,
+      rgba(254, 228, 64, 0.07),   /* accent */
+      transparent 65%
+    ),
+    /* Bottom-right info glow */
+    radial-gradient(
+      ellipse 800px 500px at 105% 110%,
+      rgba(56, 189, 248, 0.06),   /* info */
+      transparent 65%
+    ),
+    /* Base gradient */
+    linear-gradient(
+      160deg,
+      rgb(var(--surface-base)) 0%,
+      rgb(var(--surface-raised)) 100%
+    );
+
+  transition: background 0.3s ease;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: rgb(var(--ui-border-strong));
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--content-tertiary));
+}
+
+/* ── Selection ───────────────────────────────────────────── */
+::selection {
+  background: rgba(254, 228, 64, 0.3);
+  color: rgb(var(--content-primary));
+}
+
+/* ── Focus ring utility ──────────────────────────────────── */
+/* Use class="focus-ring" on interactive elements */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px rgb(var(--surface-base)), 0 0 0 4px #FEE440;
+}
+
+/* ── Skeleton animation ──────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1;    }
+  50%       { opacity: 0.45; }
+}
+.skeleton {
+  background: rgb(var(--ui-skeleton));
+  border-radius: 6px;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+

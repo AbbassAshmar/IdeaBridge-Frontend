@@ -6,5 +6,6 @@ export const endpoints = {
   REGISTER: () => "/api/auth/register",
   LOGOUT: () => "/api/auth/logout",
   GET_CURRENT_USER: () => "/api/auth/user",
+  UPDATE_PROFILE: () => "/api/users/profile",
   GET_CATEGORIES: () => "/api/categories",
 };

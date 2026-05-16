@@ -27,3 +27,8 @@ export async function getCurrentUser() {
 	const response = await apiClient.get(endpoints.GET_CURRENT_USER());
 	return response.data;
 }
+
+export async function updateCurrentUser(payload) {
+	const response = await apiClient.patch(endpoints.UPDATE_PROFILE(), payload);
+	return response.data;
+}

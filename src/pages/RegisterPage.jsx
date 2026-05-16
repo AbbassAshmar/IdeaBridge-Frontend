@@ -17,6 +17,7 @@ function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
   });
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
@@ -48,6 +49,10 @@ function RegisterPage() {
       nextErrors.confirmPassword = "Passwords do not match.";
     }
 
+    if (!["user", "developer"].includes(formData.role)) {
+      nextErrors.role = "Please choose a valid role.";
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -76,12 +81,12 @@ function RegisterPage() {
         username: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
-        role: "user",
+        role: formData.role,
       });
 
       setMessageType("success");
       setMessage(response?.data?.message || "Registered successfully.");
-      navigate("/dashboard", { replace: true });
+      navigate("/ideas", { replace: true });
     } catch (error) {
       const detailErrors = getValidationErrors(error);
       setErrors({
@@ -89,6 +94,7 @@ function RegisterPage() {
         email: detailErrors?.email?.[0] || "",
         password: detailErrors?.password?.[0] || "",
         confirmPassword: "",
+        role: detailErrors?.role?.[0] || "",
       });
       setMessageType("error");
       setMessage(getErrorMessage(error, "Unable to register."));
@@ -152,9 +158,52 @@ function RegisterPage() {
             icon={Lock}
           />
 
+          <div className="mb-4">
+            <p className="mb-2 block text-sm text-content-tertiary">Role</p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    role: "user",
+                  }));
+                  setErrors((prev) => ({ ...prev, role: "" }));
+                }}
+                className={`inline-flex items-center rounded-pill border px-4 py-2 text-sm font-semibold transition ${
+                  formData.role === "user"
+                    ? "border-accent-400 bg-accent-400/20 text-accent-600 dark:text-accent-200"
+                    : "border-ui-border text-content-tertiary hover:text-content-secondary"
+                }`}
+              >
+                User
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    role: "developer",
+                  }));
+                  setErrors((prev) => ({ ...prev, role: "" }));
+                }}
+                className={`inline-flex items-center rounded-pill border px-4 py-2 text-sm font-semibold transition ${
+                  formData.role === "developer"
+                    ? "border-accent-400 bg-accent-400/20 text-accent-600 dark:text-accent-200"
+                    : "border-ui-border text-content-tertiary hover:text-content-secondary"
+                }`}
+              >
+                Developer
+              </button>
+            </div>
+            <p className="mt-1.5 min-h-[18px] text-xs text-danger">
+              {errors.role || ""}
+            </p>
+          </div>
+
           <button
             type="submit"
-            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 px-4 py-3 text-sm font-semibold text-slate-50 transition hover:-translate-y-0.5 hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-80"
+            className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-card bg-gradient-to-br from-accent-400 to-accent-500 px-4 py-3 text-sm font-semibold text-content-inverse transition hover:-translate-y-0.5 hover:shadow-glow-accent disabled:cursor-not-allowed disabled:opacity-80"
             disabled={isSubmitting}
           >
             <UserPlus size={16} />
@@ -164,11 +213,11 @@ function RegisterPage() {
           <FormMessage message={message} type={messageType} />
         </form>
 
-        <p className="mt-4 text-sm text-slate-400">
+        <p className="mt-4 text-sm text-content-tertiary">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-semibold text-blue-300 no-underline hover:text-blue-200 hover:underline"
+            className="font-semibold text-accent-400 no-underline hover:text-accent-300 hover:underline"
           >
             Login
           </Link>
