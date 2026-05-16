@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDownUp, Lightbulb, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "../components/AppLayout";
+import IdeaCard from "../components/IdeaCard";
 import { useAuth } from "../hooks/useAuth";
 import { getIdeas, getUserIdeas, setIdeaInteraction } from "../services/api/ideas";
 import { getErrorMessage } from "../services/api/client";
 
 function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [ideas, setIdeas] = useState([]);
   const [rawIdeas, setRawIdeas] = useState([]);
@@ -201,6 +204,10 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
     }
   };
 
+  const handleOpenIdea = (ideaId) => {
+    navigate(`/ideas/${ideaId}`);
+  };
+
   const totalPages = pagination?.total_pages ?? 1;
   const page = pagination?.page ?? filters.page;
   const isMineFeed = activeFeed === "mine";
@@ -312,86 +319,13 @@ function DashboardPage({ initialFeed = "all", allowFeedToggle = true }) {
           ) : null}
 
           {ideas.map((idea) => (
-            <article
+            <IdeaCard
               key={idea.id}
-              className="rounded-card border border-ui-border/50 bg-gradient-to-br from-surface-raised/90 to-surface-base/90 p-6 shadow-card-light dark:shadow-card-dark"
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-content-tertiary">
-                    <span className="rounded-badge border border-accent-400/40 bg-accent-400/10 px-3 py-1 text-xs font-semibold text-accent-600 dark:text-accent-200">
-                      {idea?.category?.name || "Uncategorized"}
-                    </span>
-                    <span className="rounded-badge border border-ui-border bg-surface-sunken/60 px-3 py-1 text-xs font-semibold text-content-primary">
-                      {idea?.status || "available"}
-                    </span>
-                    <span className="text-xs">
-                      {idea?.created_at ? new Date(idea.created_at).toLocaleString() : ""}
-                    </span>
-                  </div>
-                  <h2 className="text-xl font-semibold text-content-primary">{idea.title}</h2>
-                  <p className="mt-2 text-sm text-content-secondary">{idea.description}</p>
-                </div>
-
-                <div className="flex flex-col items-start gap-2 text-sm text-content-tertiary md:items-end">
-                  <span className="text-xs text-content-tertiary">Author</span>
-                  <span className="font-medium text-content-primary">
-                    {idea?.user?.username || idea?.user?.email || "Unknown"}
-                  </span>
-                  {idea?.taken_by_user ? (
-                    <span className="text-xs text-success">
-                      Taken by {idea.taken_by_user.username || idea.taken_by_user.email}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-content-tertiary">
-                <span>Upvotes: {idea?.upvotes_count ?? 0}</span>
-                <span>Downvotes: {idea?.downvotes_count ?? 0}</span>
-                <span className="text-xs text-content-tertiary">
-                  Your vote: {idea?.user_vote || "neutral"}
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleInteraction(idea.id, "upvote")}
-                    disabled={interactionLoading.ideaId === idea.id || isLoading}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                      idea?.user_vote === "upvote"
-                        ? "border-success/70 bg-success/15 text-success"
-                        : "border-ui-border text-content-primary"
-                    } disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    Upvote
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInteraction(idea.id, "downvote")}
-                    disabled={interactionLoading.ideaId === idea.id || isLoading}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                      idea?.user_vote === "downvote"
-                        ? "border-danger/70 bg-danger/15 text-danger"
-                        : "border-ui-border text-content-primary"
-                    } disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    Downvote
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInteraction(idea.id, "neutral")}
-                    disabled={interactionLoading.ideaId === idea.id || isLoading}
-                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                      idea?.user_vote === "neutral"
-                        ? "border-accent-400/70 bg-accent-400/15 text-accent-600 dark:text-accent-200"
-                        : "border-ui-border text-content-primary"
-                    } disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    Neutral
-                  </button>
-                </div>
-              </div>
-            </article>
+              idea={idea}
+              onVote={handleInteraction}
+              onOpen={handleOpenIdea}
+              isVoteLoading={interactionLoading.ideaId === idea.id || isLoading}
+            />
           ))}
         </div>
 

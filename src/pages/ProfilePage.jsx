@@ -4,9 +4,12 @@ import FormMessage from "../components/FormMessage";
 import { useAuth } from "../hooks/useAuth";
 import { getErrorMessage, getValidationErrors } from "../services/api/client";
 import { updateCurrentUser } from "../services/api/auth";
-import { getUserIdeas } from "../services/api/ideas";
+import { getDeveloperIdeas, getUserIdeas } from "../services/api/ideas";
+import { getMyComments } from "../services/api/comments";
 import { getAvatarData } from "../utils/avatar";
-import { getPrimaryRole } from "../utils/userRoles";
+import { formatIdeaStatus } from "../utils/ideaStatus";
+import { getPrimaryRole, isDeveloper } from "../utils/userRoles";
+import MyCommentCard from "../components/MyCommentCard";
 
 function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -20,9 +23,20 @@ function ProfilePage() {
   const [messageType, setMessageType] = useState("success");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("ideas");
+
   const [myIdeas, setMyIdeas] = useState([]);
+  const [currentlyWorkingIdeas, setCurrentlyWorkingIdeas] = useState([]);
+  const [completedIdeas, setCompletedIdeas] = useState([]);
   const [ideasError, setIdeasError] = useState("");
   const [isLoadingIdeas, setIsLoadingIdeas] = useState(false);
+
+  const [myComments, setMyComments] = useState([]);
+  const [commentsPage, setCommentsPage] = useState(1);
+  const [commentsPagination, setCommentsPagination] = useState(null);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentsError, setCommentsError] = useState("");
+
+  const isDeveloperUser = useMemo(() => isDeveloper(user), [user]);
 
   const displayName = useMemo(
     () => user?.username || user?.email || "User",
@@ -58,13 +72,20 @@ function ProfilePage() {
       try {
         setIsLoadingIdeas(true);
         setIdeasError("");
-        const response = await getUserIdeas();
+        const [myIdeasResponse, developerIdeasResponse] = await Promise.all([
+          getUserIdeas(),
+          isDeveloperUser ? getDeveloperIdeas() : Promise.resolve(null),
+        ]);
 
         if (!isActive) {
           return;
         }
 
-        setMyIdeas(response?.data?.ideas ?? []);
+        setMyIdeas(myIdeasResponse?.data?.ideas ?? []);
+        setCurrentlyWorkingIdeas(
+          developerIdeasResponse?.data?.currently_working_on ?? [],
+        );
+        setCompletedIdeas(developerIdeasResponse?.data?.completed_ideas ?? []);
       } catch (error) {
         if (!isActive) {
           return;
@@ -82,7 +103,65 @@ function ProfilePage() {
     return () => {
       isActive = false;
     };
-  }, [activeTab, user]);
+  }, [activeTab, isDeveloperUser, user]);
+
+  useEffect(() => {
+    if (!user || activeTab !== "comments") {
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchComments = async () => {
+      try {
+        setIsLoadingComments(true);
+        setCommentsError("");
+        const response = await getMyComments({ page: commentsPage, limit: 10 });
+
+        if (!isActive) return;
+
+        setMyComments(response?.data?.comments ?? []);
+        setCommentsPagination(response?.meta?.pagination ?? null);
+      } catch (error) {
+        if (!isActive) return;
+        setCommentsError(getErrorMessage(error, "Failed to load your comments."));
+      } finally {
+        if (isActive) setIsLoadingComments(false);
+      }
+    };
+
+    fetchComments();
+
+    return () => { isActive = false; };
+  }, [activeTab, commentsPage, user]);
+
+  const renderIdeaCollection = (items, emptyMessage) => (
+    <div className="space-y-3">
+      {items.length === 0 ? (
+        <div className="rounded-card border border-ui-border bg-surface-base p-4 text-sm text-content-tertiary">
+          {emptyMessage}
+        </div>
+      ) : null}
+
+      {items.map((idea) => (
+        <article
+          key={idea.id}
+          className="rounded-card border border-ui-border/70 bg-surface-base p-4"
+        >
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <span className="rounded-badge border border-accent-400/40 bg-accent-400/10 px-3 py-1 text-xs font-semibold text-accent-600 dark:text-accent-200">
+              {idea?.category?.name || "Uncategorized"}
+            </span>
+            <span className="rounded-badge border border-ui-border bg-surface-sunken/70 px-3 py-1 text-xs font-semibold text-content-primary">
+              {formatIdeaStatus(idea?.status)}
+            </span>
+          </div>
+          <h3 className="text-base font-semibold text-content-primary">{idea.title}</h3>
+          <p className="mt-1 text-sm text-content-tertiary">{idea.description}</p>
+        </article>
+      ))}
+    </div>
+  );
 
   const validate = () => {
     const nextErrors = {};
@@ -303,8 +382,8 @@ function ProfilePage() {
             </button>
           </div>
 
-          {activeTab === "ideas" ? (
-            <div className="space-y-3">
+          {activeTab === "ideas" && (
+            <div className="space-y-6">
               {isLoadingIdeas ? (
                 <div className="rounded-card border border-ui-border bg-surface-base p-4 text-sm text-content-tertiary">
                   Loading your ideas...
@@ -317,33 +396,99 @@ function ProfilePage() {
                 </div>
               ) : null}
 
-              {!isLoadingIdeas && !ideasError && myIdeas.length === 0 ? (
+              {!isLoadingIdeas && !ideasError ? (
+                <div className="space-y-6">
+                  {!isDeveloperUser ? (
+                    <div>
+                      <h3 className="mb-3 text-sm font-semibold text-content-primary">
+                        My Ideas
+                      </h3>
+                      {renderIdeaCollection(myIdeas, "You have not created ideas yet.")}
+                    </div>
+                  ) : null}
+
+                  {isDeveloperUser ? (
+                    <div>
+                      <h3 className="mb-3 text-sm font-semibold text-content-primary">
+                        Currently Working On
+                      </h3>
+                      {renderIdeaCollection(
+                        currentlyWorkingIdeas,
+                        "You are not currently working on any ideas.",
+                      )}
+                    </div>
+                  ) : null}
+
+                  {isDeveloperUser ? (
+                    <div>
+                      <h3 className="mb-3 text-sm font-semibold text-content-primary">
+                        Completed Ideas
+                      </h3>
+                      {renderIdeaCollection(
+                        completedIdeas,
+                        "You have not completed any ideas yet.",
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          )}
+          {activeTab === "comments" && (
+            <div className="space-y-4">
+              {isLoadingComments ? (
                 <div className="rounded-card border border-ui-border bg-surface-base p-4 text-sm text-content-tertiary">
-                  You have not created ideas yet.
+                  Loading your comments...
                 </div>
               ) : null}
 
-              {myIdeas.map((idea) => (
-                <article
-                  key={idea.id}
-                  className="rounded-card border border-ui-border/70 bg-surface-base p-4"
-                >
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className="rounded-badge border border-accent-400/40 bg-accent-400/10 px-3 py-1 text-xs font-semibold text-accent-600 dark:text-accent-200">
-                      {idea?.category?.name || "Uncategorized"}
-                    </span>
-                    <span className="rounded-badge border border-ui-border bg-surface-sunken/70 px-3 py-1 text-xs font-semibold text-content-primary">
-                      {idea?.status || "available"}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-semibold text-content-primary">{idea.title}</h3>
-                  <p className="mt-1 text-sm text-content-tertiary">{idea.description}</p>
-                </article>
+              {commentsError ? (
+                <div className="rounded-card border border-danger/40 bg-danger/10 p-4 text-sm text-danger">
+                  {commentsError}
+                </div>
+              ) : null}
+
+              {!isLoadingComments && !commentsError && myComments.length === 0 ? (
+                <div className="rounded-card border border-ui-border bg-surface-base p-4 text-sm text-content-tertiary">
+                  You have not made any comments yet.
+                </div>
+              ) : null}
+
+              {myComments.map((comment) => (
+                <MyCommentCard key={comment.id} comment={comment} />
               ))}
-            </div>
-          ) : (
-            <div className="rounded-card border border-ui-border bg-surface-base p-4 text-sm text-content-tertiary">
-              No comments yet.
+
+              {commentsPagination && commentsPagination.total_pages > 1 ? (
+                <div className="flex items-center justify-between gap-3 rounded-card border border-ui-border/50 bg-surface-base/80 px-4 py-3 text-sm text-content-tertiary">
+                  <span>
+                    Page {commentsPagination.page} of {commentsPagination.total_pages}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCommentsPage((p) => Math.max(1, p - 1))}
+                      disabled={commentsPage <= 1 || isLoadingComments}
+                      className="rounded-lg border border-ui-border px-3 py-1.5 text-content-primary transition disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCommentsPage((p) =>
+                          Math.min(commentsPagination.total_pages, p + 1)
+                        )
+                      }
+                      disabled={
+                        commentsPage >= commentsPagination.total_pages || isLoadingComments
+                      }
+                      className="rounded-lg border border-ui-border px-3 py-1.5 text-content-primary transition disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
         </div>

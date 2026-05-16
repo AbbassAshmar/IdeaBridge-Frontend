@@ -4,6 +4,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import DashboardPage from "../pages/DashboardPage";
 import CreateIdeaPage from "../pages/CreateIdeaPage";
+import IdeaDetailsPage from "../pages/IdeaDetailsPage";
 import ProfilePage from "../pages/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoute";
@@ -52,6 +53,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ideas/:idea_id"
+        element={
+          <ProtectedRoute>
+            <IdeaDetailsPage />
           </ProtectedRoute>
         }
       />
